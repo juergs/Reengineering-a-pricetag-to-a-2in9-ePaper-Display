@@ -19,7 +19,7 @@ Third:  When there is a demo-code given by the manufacturer, they are some kind 
 So this Platformio-code is intended as basis to evaluate code to operate this specific display. 
 The code is a mixup of different code-parts, in order to get some kind of more advanced capabilities, as usual demo-codes are providing. 
 
-Thanks to Adafruit, Waveshare etc. for their Aduino-Libs, which are inspiring examples ...  ( ... but partially not able to run correctly)
+Thanks to Adafruit, Waveshare etc. for their Aduino-Libs, which are inspiring examples ...  ( ... but partially not able to run correctly on this specific display)
 
 Basic ePaper-operation is explained [here](https://www.zephray.me/post/stm32_epd_calendar/).
 
