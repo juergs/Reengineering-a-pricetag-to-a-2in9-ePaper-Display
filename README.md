@@ -19,7 +19,8 @@ Third:  When there is a demo-code given by the manufacturer, they are some kind 
 So this Platformio-code is intended as basis to evaluate code to operate this specific display. 
 The code is a mixup of different code-parts, in order to get some kind of more advanced capabilities, as usual demo-codes are providing. 
 
-Thanks to Adafruit, Waveshare etc. for their Aduino-Libs, which libs are inspiring examples ...  
+Thanks to Adafruit, Waveshare etc. for their Aduino-Libs, which are inspiring examples ...  ( ... but partially not able to run correctly)
+Basic [ePaper](https://www.zephray.me/post/stm32_epd_calendar/) operation explained.
 
 This initial version is intendend to serve for testting basich functions and is still not completed yet! 
 
