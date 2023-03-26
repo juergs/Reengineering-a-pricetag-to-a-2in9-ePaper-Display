@@ -1,4 +1,4 @@
-# Reengineering-a-pricetag-to-a-2in9-ePaper-Display
+# Reengineering-a-pricetag-to-a-2in9-ePaper-Display (using PlatformIo/Arduino/ESP8266)
 refurbrishing a pricetag into an 2.9 inch ePaper-display for ESP8266 Wemos D1 usage. 
 
 <img src="https://github.com/juergs/Reengineering-a-pricetag-to-a-2in9-ePaper-Display/blob/main/pics/epaper_2.9-overview.png" width="800"/>
@@ -9,11 +9,11 @@ refurbrishing a pricetag into an 2.9 inch ePaper-display for ESP8266 Wemos D1 us
 
 <img src="https://github.com/juergs/Reengineering-a-pricetag-to-a-2in9-ePaper-Display/blob/main/pics/overview_epd_interface_schematic.png" width="800"/>
 
-Taking this blog article from Aaaron as initial trigger: [Arrons Blog]([https://pages.github.com/](http://atcnetz.blogspot.com/2019/02/ausgemusterete-elektronische-e-ink.html)
+Taking this blog article from Aaaron as initial trigger: [Aarons Blog]([https://pages.github.com/](http://atcnetz.blogspot.com/2019/02/ausgemusterete-elektronische-e-ink.html)
 i started to find a reuse for some old cheap pricetags. Not knowing that this will be some kind of a tough purpouse ... 
 
 First:  Not knowing which type of ePaper-display i was using. 
-Second: Not knowing, that there are tons of different types there outside. All with different controller and setups.
+Second: Not knowing, that there are tons of different types there outside. All with different controller-types, manuals and setups.
 Third:  When there is a demo-code given by the manufacturer, they are some kind of incomplete. Mainly lacking further informations, i.e why things are done in a certain way. 
 
 So this Platformio-code is intended as basis to evaluate code to operate this specific display. 
