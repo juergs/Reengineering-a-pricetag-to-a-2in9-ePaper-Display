@@ -20,7 +20,8 @@ So this Platformio-code is intended as basis to evaluate code to operate this sp
 The code is a mixup of different code-parts, in order to get some kind of more advanced capabilities, as usual demo-codes are providing. 
 
 Thanks to Adafruit, Waveshare etc. for their Aduino-Libs, which are inspiring examples ...  ( ... but partially not able to run correctly)
-Basic [ePaper](https://www.zephray.me/post/stm32_epd_calendar/) operation explained.
+
+Basic ePaper-operation is explained [here](https://www.zephray.me/post/stm32_epd_calendar/).
 
 This initial version is intendend to serve for testting basich functions and is still not completed yet! 
 
