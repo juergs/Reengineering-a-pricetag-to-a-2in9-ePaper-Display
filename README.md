@@ -23,5 +23,7 @@ Thanks to Adafruit, Waveshare etc. for their Aduino-Libs, which libs are inspiri
 
 This initial version is intendend to serve for testting basich functions and is still not completed yet! 
 
-DIY-Hardware: i desoldered all parts from the pricetag-pcb and used them on the interface-pcb (Gerber-fils added). Using a tool like the [MHP30]([https://de.aliexpress.com/item/1005001800667409.html?gatewayAdapt=glo2deu)
+DIY-Hardware: i desoldered all parts from the pricetag-pcb and used them on the interface-pcb (Gerber-fils added). 
+
+Using a tool like the [MHP30](https://de.aliexpress.com/item/1005001800667409.html?gatewayAdapt=glo2deu)
 
