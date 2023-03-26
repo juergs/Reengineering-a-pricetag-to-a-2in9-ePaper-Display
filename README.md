@@ -5,8 +5,13 @@ Taking this blog article from Aaaron as initial trigger: [Aarons Blog](http://at
 i started to find a reuse for some old cheap pricetags. Not knowing that this will be some kind of a tough purpouse ... 
 
 First:  Not knowing which type of ePaper-display i was using. 
+
+
 Second: Not knowing, that there are tons of different types there outside. All with different controller-types, manuals and setups.
+
+
 Third:  When there is a demo-code given by the manufacturer, they are some kind of incomplete. Mainly lacking further informations, i.e why things are done in a certain way. 
+
 
 So this Platformio-code is intended as basis to evaluate code to operate this specific display. 
 The code is a mixup of different code-parts, in order to get some kind of more advanced capabilities, as usual demo-codes are providing. 
