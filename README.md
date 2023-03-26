@@ -15,6 +15,8 @@ Thanks to Adafruit, Waveshare etc. for their Aduino-Libs, which are inspiring ex
 
 Basic ePaper-operation is explained [here](https://www.zephray.me/post/stm32_epd_calendar/).
 
+[3d-printed case](https://hackaday.io/project/189695-triink-low-power-ble-e-paper-clock)
+
 This initial version is intendend to serve for testting basich functions and is still not completed yet! 
 
 DIY-Hardware: i desoldered all parts from the pricetag-pcb and used them on the interface-pcb (Gerber-files added to project). 
