@@ -1,5 +1,5 @@
 # Reengineering-a-pricetag-to-a-2in9-ePaper-Display (using PlatformIo/Arduino/ESP8266)
-## refurbrishing a pricetag into an 2.9 inch ePaper-display for ESP8266 Wemos D1 usage. 
+## Refurbrishing a pricetag into an 2.9 inch ePaper-display for ESP8266 Wemos D1 usage. 
 
 Taking this blog article from Aaaron as initial trigger: [Aarons Blog](http://atcnetz.blogspot.com/2019/02/ausgemusterete-elektronische-e-ink.html)
 i started to find a reuse for some old cheap pricetags. Not knowing that this will be some kind of a tough purpouse ... 
