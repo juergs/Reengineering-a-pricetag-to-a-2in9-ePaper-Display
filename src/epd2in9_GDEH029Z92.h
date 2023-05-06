@@ -5,6 +5,8 @@
  *  
  *  Copyright (C) Waveshare     July 31 2017
  *
+ * **/
+/**
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documnetation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -30,12 +32,16 @@
 #include "epdif.h"
 
 #define GxEPD_BLACK 0xFF
-#define GxEPD_RED 0x00
+#define GxEPD_RED   0x00
 #define GxEPD_WHITE 0x00
 
 //--- Display resolution
 #define EPD_WIDTH       128
 #define EPD_HEIGHT      296
+
+//TODO rotiert?
+//#define EPD_WIDTH       296
+//#define EPD_HEIGHT      128
 
 //Todo: Puffer-Deklaration erforderlich?  
 //--- sind 4.736 BYtes oder 37.888 Bits
@@ -78,10 +84,10 @@
     #define PROGRAM_MODE                                0xA0
     #define ACTIVE_PROGRAM                              0xA1
     #define READ_OTP_DATA                               0xA2
-    #define POWER_SAVING                                0xE3
+    #define POWER_SAVING                                0xE3 
 #endif
-
-/* uint8_t _WF_PARTIAL_2IN9[159] =
+/*
+uint8_t _WF_PARTIAL_2IN9[159] =
 {
     0x0,0x40,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
     0x80,0x80,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
@@ -103,7 +109,8 @@
     0x22,0x22,0x22,0x22,0x22,0x22,0x0,0x0,0x0,
     0x22,0x17,0x41,0xB0,0x32,0x36,
 };
- */
+*/
+
 class Epd : EpdIf {
 public:
     unsigned int width;
@@ -136,6 +143,9 @@ public:
     void Display_Partial(uint8_t *Image);
     void SetWindows(uint16_t Xstart, uint16_t Ystart, uint16_t Xend, uint16_t Yend);
     void SetCursor(uint16_t Xstart, uint16_t Ystart);
+
+    void Transfer_LUT(unsigned char *lut);
+
 
     uint8_t PARTIAL_LUT[159] =
     {

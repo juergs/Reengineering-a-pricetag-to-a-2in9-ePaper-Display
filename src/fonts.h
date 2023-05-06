@@ -1,9 +1,9 @@
 /**
   ******************************************************************************
   * @file    fonts.h
-  * @author  MCD Application Team
-  * @version V1.0.0
-  * @date    18-February-2014
+  * @author  juergs
+  * @version V1.0.1
+  * @date    07-April-2023
   * @brief   Header for fonts.c file
   ******************************************************************************
   * @attention
@@ -33,6 +33,11 @@
   * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   *
   ******************************************************************************
+  * Font 8   are 58 chars per line, @2in9
+  * Font 12  are 41 chars per line, @2in9
+  * Font 16  are 25 chars per line, @2in9
+  * Font 20  are 20 chars per line, @2in9
+  * Font 24  are 16 chars per line, @2in9
   */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
@@ -72,4 +77,4 @@ extern sFONT Font8;
 #endif /* __FONTS_H */
  
 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+/************************ (C) COPYRIGHT juergs *****END OF FILE****/

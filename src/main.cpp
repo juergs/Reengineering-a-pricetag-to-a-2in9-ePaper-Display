@@ -22,15 +22,28 @@
  * LIABILITY WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
+ * 
+ *  there are 2 memory areas embedded in the e-paper display
+ *  and once the display is refreshed, the memory area will be auto-toggled,
+ *  i.e. the next action of SetFrameMemory will set the other memory area
+ *  therefore you have to set the frame memory and refresh the display twice.
+ *
+ * see also: 
+ *    D:\Work_Epaper\_projects\e-Paper-WaveShare_Demo\e-Paper\Arduino\epd2in9_V2   -for partial update code sample
+ *    https://github.com/waveshare/e-Paper/tree/master
+ *    https://github.com/waveshare/e-Paper/tree/master/Arduino/epd2in9_V2
+ * 
+ *    Sample-code using "WEMOS D1 Mini" / ESP8266!
+ * 
  */
 #include "Debug.h"
 #include "ArduinoTrace.h"
 #include <SPI.h>
-#include "epd2in9_GDEH029Z92.h"
+#include "epd2in9_GDEH029Z92.h"    // needed for epd? GDEH029Z94 is ok, too. Using SSD1680-Controller 
 #include "GUI_Paint.h"
 #include "imagedata.h"
-#include "epdpaint.h"
-
+#include "fonts.h"
+#include <stdint.h>
 
 #define COLORED     0
 #define UNCOLORED   1
@@ -54,6 +67,8 @@ void setup()
     //--- put your setup code here, to run once:
     Serial.begin(115200);
     Serial.println("");
+
+    //printf("Test_printf %d", 100);
     
     
     //--- class with lowlevel functions (epd2in9_GDEH029Z92)
@@ -77,7 +92,6 @@ void setup()
     //--- prepareings: clears directly the SRAM-buffer on the e-paper display, without sw-buffer 
     epd.ClearFrame();
 
-
     //--- sw-buffer: big enough heap size ? 
     //--- https://arduino-esp8266.readthedocs.io/en/latest/mmu.html
 
@@ -97,43 +111,82 @@ void setup()
     //*******************************************************************************************************
     // TESTCASE(S)
     //*******************************************************************************************************
-    Debug("Now, draw a black line on a white background ...\r\n");
-    Paint_NewImage(MyImage, EPD_WIDTH, EPD_HEIGHT, ROTATE_0, WHITE);   // white background, rotation works 
+    Debug("Now, execute testcases ...\r\n");    
+    Debug("Draw-Canvas init.\r\n"); 
+    //Paint_NewImage(MyImage, EPD_WIDTH, EPD_HEIGHT, ROTATE_90, WHITE);   // white background, rotation works  (270 not? 180 + 0, OK)
     
-    Paint_SelectImage(MyImage);                                        // grep the image-buffer  
+    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    Paint_NewImage(MyImage, EPD_HEIGHT, EPD_WIDTH, ROTATE_90, WHITE);   // white background, rotation works  (270 not? 180 + 0, OK)
+    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    //TODO check rotation and mirroring. Check their defaults  
+    Debug("Draw-Canvas created.\r\n"); 
     
+    Paint_SelectImage(MyImage);                                        // grep the image-buffer      
     Paint_Clear(WHITE);
-    
+       
+    //Debug ("call Paint_DrawCharAt");  
+    //Paint.Rotate = ROTATE_270; 
+    // auf *Paint_DrawCharAt* geändert! Paint_DrawChar Pointer-Exception?!
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    Debug ("call Paint_DrawText");  
+    //Paint_DrawText(20,10, "Hallo. Dies ist ein Test, der ueber zwei Zeilen geht.", &Font16, BLACK, WHITE); 
+    //TODO: real text positioning, regarding also text.length and CRs
+    // OK, tested
+    //Paint_DrawText(Font16.Width +20, Font16.Height +10, "01234567890123456789012345678901234567890123456789.", &Font16, BLACK, WHITE); 
+    //Paint_DrawText (0, 0, "01234567890123456789012345678901234567890123456789.", &Font16, BLACK, WHITE);            // Font 16  are 25 chars per line
+    //Paint_DrawText (0, 0, "012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789", &Font8, BLACK, WHITE);     // Font 8   are 58 chars per line
+    //Paint_DrawText (0, 0, "012345678901234567890123456789012345678901234567890123456789", &Font12, BLACK, WHITE);   // Font 12  are 41 chars per line
+    //Paint_DrawText (0, 0, "012345678901234567890123456789012345678901234567890123456789", &Font20, BLACK, WHITE);   // Font 20  are 20 chars per line
+    //Paint_DrawText (0, 0, "012345678901234567890123456789012345678901234567890123456789", &Font24, BLACK, WHITE);     // Font 24  are 16 chars per line
+    //Paint_DrawText (0, 0, "012345678901234567890123456789012345678901234567890123456789", &Font24, BLACK, WHITE);     // Font 24  are 16 chars per line
+
+    //Paint_DrawStringAt(0,50,"abcdefghijkl", &Font16, COLORED);
+
+    //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    // ok, funktioniert
+    //Paint_DrawCharAt(20,1, '*',&Font16, UNCOLORED);
+
+    Debug ("Paint_DrawCharAt.Ready");  
+
+  //TODO: @epd2in9_V2-demo.ino
+
+  //epd.SetFrameMemory_Partial(paint.GetImage(), 80, 72, paint.GetWidth(), paint.GetHeight());
+  //epd.DisplayFrame_Partial();
+
+/* OK*/
+   /* 
     Paint_DrawPoint(1,1,BLACK,DOT_PIXEL_1X1, DOT_FILL_AROUND); 
     Paint_DrawPoint(1,10,BLACK,DOT_PIXEL_1X1, DOT_FILL_AROUND);
     Paint_DrawPoint(1,20,BLACK,DOT_PIXEL_1X1, DOT_FILL_AROUND);
     Paint_DrawPoint(1,30,BLACK,DOT_PIXEL_1X1, DOT_FILL_AROUND);
     Paint_DrawPoint(1,40,BLACK,DOT_PIXEL_1X1, DOT_FILL_AROUND);
-
-   // Paint_DrawString_EN(1,40, "Hallo. Dies ist ein Test", &Font16, BLACK, WHITE); 
+   */
 
     //---      ( Xstart | Ystart | Xend | Yend | Color | DOT_PIXEL Line_width | LINE_STYLE Line_Style
     //Paint_DrawLine(20, 10, 20, 120, BLACK, DOT_PIXEL_1X1, LINE_STYLE_SOLID); 
-    Paint_DrawLine(20, 10, 20, 120, WHITE, DOT_PIXEL_4X4, LINE_STYLE_SOLID); 
+    /* Paint_DrawLine(20, 10, 20, 120, BLACK, DOT_PIXEL_2X2, LINE_STYLE_SOLID);  */
 
-    /* for (int dy=1; dy < 128; dy += 10) 
+    /* 
+    for (int dy=1; dy < 128; dy += 10) 
     {
         DUMP(dy); 
         //---      ( Xstart | Ystart | Xend | Yend | Color | DOT_PIXEL Line_width | LINE_STYLE Line_Style
         //Paint_DrawLine(20, dy, 20, 120, BLACK, DOT_PIXEL_1X1, LINE_STYLE_SOLID); 
         Paint_DrawLine(20, dy, 20, 120, BLACK, DOT_PIXEL_2X2, LINE_STYLE_SOLID); 
-    } */
-
-    //epd.DisplayBuffer(MyImage);    // black on white
-    epd.Display_Base(MyImage);        //black on red background
+    } 
+    */
+ 
+    epd.DisplayBuffer(MyImage);    // black on white
+    
+    //epd.Display_Base(MyImage);   //black on red background
+    
     //epd.Display_Partial(MyImage);
 
     //*******************************************************************************************************
-
-    Debug("Drawline Black done....\r\n");
-
-    //*******************************************************
-/* 
+    /* 
     Debug("Drawline Black done....\r\n");
     delay(4000);
 
@@ -163,9 +216,39 @@ void setup()
     Debug("Drawline red done....\r\n");
     delay(4000);
  */
+
+    Debug ("Begin testing TEST_PARTIAL.in \r\n");
     
+    Debug ("call Display_Base\r\n");
+    //epd.Display_Base(&IMAGE_BLACK);   //black on red background
+
+    Debug ("call DisplayFrame IMAGE_BLACK + IMAGE_RED\r\n");
+    epd.ClearFrame();
+    epd.DisplayFrame(IMAGE_BLACK,IMAGE_RED); 
+    delay(5000);
+
+    Debug ("call DisplayFrame IMAGE_BLACK\r\n");
+    epd.ClearFrame();
+    epd.DisplayFrame(IMAGE_BLACK,NULL); 
+    delay(5000);
+
+    Debug ("call DisplayFrame IMAGE_RED\r\n");
+    epd.ClearFrame();
+    epd.DisplayFrame(NULL,IMAGE_RED); 
+
+    //Debug ("call Display_Partial");
+    //epd.Display_Partial(IMAGE_BLACK);
+
+    Debug ("call TEST_PARTIAL.out \r\n");
+
+    Debug ("enter DEEP_SLEEP\r\n");
+    epd.DeepSleep(); 
+    
+  
+  
+  //--- Done, stop here  
   TRACE();
-  Debug("Stopped by Enless_loop");
+  Debug("Stopped by Enless_loop\r\n");
   epd.EndlessLoop(); 
 
   //PAINT paint;
@@ -180,9 +263,8 @@ void setup()
     
   
     for (int x = 0; x < 120; x++)
-    {
-      //--- schreibt nur in den Puffer
-      paint.DrawAbsolutePixel(x, 5, COLORED);
+    {      
+      paint.DrawAbsolutePixel(x, 5, COLORED);   //--- writes to buffer only
     } */
 
     //Todo: Puffer updaten + anzeigen
@@ -249,11 +331,12 @@ void loop()
 {
   // put your main code here, to run repeatedly:
   while (1)
-    {   
+    {  
+        //---ESP8266 needs this  
         ESP.wdtFeed(); //Feed dog to prevent system reset
         // put your main code here, to run repeatedly:
         digitalWrite(LED_BUILTIN, LOW);   // Turn the LED on (Note that LOW is the voltage level
-        delay(5);
+        delay(2);
         digitalWrite(LED_BUILTIN, HIGH);   // Turn the LED on (Note that LOW is the voltage level
         delay(250);  
     }

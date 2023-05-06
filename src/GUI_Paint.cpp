@@ -77,10 +77,12 @@
 #include "GUI_Paint.h"
 //#include "DEV_Config.h"
 #include "Debug.h"
+#include "ArduinoTrace.h"
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h> //memset()
 #include <math.h>
+//#include "fonts.h"
 
 PAINT Paint;
 
@@ -107,7 +109,8 @@ void Paint_NewImage(UBYTE *image, UWORD Width, UWORD Height, UWORD Rotate, UWORD
 //    printf(" EPD_WIDTH / 8 = %d\r\n",  122 / 8);
    
     Paint.Rotate = Rotate;
-    Paint.Mirror = MIRROR_NONE;
+    //Paint.Mirror = MIRROR_NONE;
+    Paint.Mirror = MIRROR_VERTICAL; 
     
     if(Rotate == ROTATE_0 || Rotate == ROTATE_180) {
         Paint.Width = Width;
@@ -188,6 +191,8 @@ parameter:
 ******************************************************************************/
 void Paint_SetPixel(UWORD Xpoint, UWORD Ypoint, UWORD Color)
 {
+    Debug ("Paint_SetPixel.in"); 
+
     if(Xpoint > Paint.Width || Ypoint > Paint.Height){
         Debug("Exceeding display boundaries\r\n");
         return;
@@ -211,6 +216,7 @@ void Paint_SetPixel(UWORD Xpoint, UWORD Ypoint, UWORD Color)
         Y = Paint.HeightMemory - Xpoint - 1;
         break;
     default:
+         Debug ("Paint_SetPixel.return");
         return;
     }
     
@@ -236,6 +242,8 @@ void Paint_SetPixel(UWORD Xpoint, UWORD Ypoint, UWORD Color)
         return;
     }
     
+    DUMP(Paint.Scale); 
+
     if(Paint.Scale == 2){
         UDOUBLE Addr = X / 8 + Y * Paint.WidthByte;
         UBYTE Rdata = Paint.Image[Addr];
@@ -554,6 +562,147 @@ void Paint_DrawCircle(UWORD X_Center, UWORD Y_Center, UWORD Radius,
         }
     }
 }
+//******************************************************************************************************
+// neue variante, die funktioniert :-) 
+//++++++++++++++++
+void Paint_DrawStringAt(int x, int y, const char* text, sFONT* font, int colored) {
+    const char* p_text = text;
+    unsigned int counter = 0;
+    int refcolumn = x;
+    
+    /* Send the string character by character on EPD */
+    while (*p_text != 0) {
+        /* Display one character on EPD */
+        Paint_DrawCharAt(refcolumn, y, *p_text, font, colored);
+        /* Decrement the column position by 16 */
+        refcolumn += font->Width;
+        /* Point on the next character */
+        p_text++;
+        counter++;
+    }
+}
+//++++++++++++++++
+void Paint_DrawCharAt(int x, int y, char ascii_char, sFONT* font, int colored) {
+    int i, j;
+    unsigned int char_offset = (ascii_char - ' ') * font->Height * (font->Width / 8 + (font->Width % 8 ? 1 : 0));
+    const unsigned char* ptr = &font->table[char_offset];    
+
+    for (j = 0; j < font->Height; j++) {
+        for (i = 0; i < font->Width; i++) 
+        {
+            if ( pgm_read_byte(ptr) & (0x80 >> (i % 8)) ) 
+            {
+                Paint_DrawPixel(x + i, y + j, colored);
+                //Paint_SetPixel(x + i, y + j, colored);   /// only Bitmap
+            }
+            if (i % 8 == 7) 
+            {
+                ptr++;
+            }
+        }
+        if (font->Width % 8 != 0) {
+            ptr++;
+        }
+    }
+}
+
+
+
+//++++++++++++++++
+void Paint_DrawPixel(int x, int y, int colored) 
+{
+    int point_temp;
+    
+    //--- added because Drawstring is mirrorred and roted -90 degrees
+    switch(Paint.Mirror) 
+    {
+    case MIRROR_NONE:
+        break;
+    case MIRROR_HORIZONTAL:
+        x = Paint.WidthMemory - x - 1;
+        break;
+    case MIRROR_VERTICAL:
+        y = Paint.HeightMemory - y - 1;
+        break;
+    case MIRROR_ORIGIN:
+        x = Paint.WidthMemory - x - 1;
+        y = Paint.HeightMemory - y - 1;
+        break;
+    default:
+        return;
+    }
+ 
+    if (Paint.Rotate == ROTATE_0) 
+    {
+        if(x < 0 || x >= Paint.Width || y < 0 || y >= Paint.Height) {
+            return;
+        }
+        Paint_DrawAbsolutePixel(x, y, colored);
+    } 
+    else if (Paint.Rotate == ROTATE_90) 
+    {
+        if(x < 0 || x >= Paint.Height || y < 0 || y >= Paint.Width ) 
+        {
+          return;
+        }
+        point_temp = x;
+        x = Paint.Width - y;
+        y = point_temp;
+        Paint_DrawAbsolutePixel(x, y, colored);
+    } 
+    else if (Paint.Rotate == ROTATE_180) 
+    {
+        if(x < 0 || x >= Paint.Width || y < 0 || y >= Paint.Height) 
+        {
+          return;
+        }
+        x = Paint.Width - x;
+        y = Paint.Height - y;
+        Paint_DrawAbsolutePixel(x, y, colored);
+    } 
+    else if (Paint.Rotate == ROTATE_270) 
+    {
+        if(x < 0 || x >= Paint.Height|| y < 0 || y >= Paint.Width) 
+        {
+          return;
+        }
+        point_temp = x;
+        x = y;
+        y = Paint.Height- point_temp;
+        Paint_DrawAbsolutePixel(x, y, colored);
+    }
+    
+}
+//++++++++++++++++
+void Paint_DrawAbsolutePixel(int x, int y, int colored) 
+{
+    if (x < 0 || x >= Paint.Width || y < 0 || y >= Paint.Height) 
+    {
+        return;
+    }
+    //uint8_t invert = true; //--- weiss auf weissem background
+    uint8_t invert = false; 
+    if (invert) 
+    {
+        if (colored) {
+            Paint.Image[(x + y * Paint.Width) / 8] |= 0x80 >> (x % 8);
+        } else {
+            Paint.Image[(x + y * Paint.Width) / 8] &= ~(0x80 >> (x % 8));
+        }
+    } 
+    else 
+    {
+        if (colored) 
+        {
+            Paint.Image[(x + y * Paint.Width) / 8] &= ~(0x80 >> (x % 8));
+        } 
+        else 
+        {
+            Paint.Image[(x + y * Paint.Width) / 8] |= 0x80 >> (x % 8);
+        }
+    }
+}
+//******************************************************************************************************
 
 /******************************************************************************
 function: Show English characters
@@ -570,35 +719,73 @@ void Paint_DrawChar(UWORD Xpoint, UWORD Ypoint, const char Acsii_Char,
 {
     UWORD Page, Column;
 
+    Debug ("Paint_DrawChar.in\r\n"); 
+
     if (Xpoint > Paint.Width || Ypoint > Paint.Height) {
         Debug("Paint_DrawChar Input exceeds the normal display range\r\n");
         return;
     }
 
+    //uint32_t Char_Offset = (Acsii_Char - ' ') * Font->Height * (Font->Width / 8 + (Font->Width % 8 ? 1 : 0));
+    //unsigned int Char_Offset = (Ascii_Char - ' ') * Font->Height * (Font->Width / 8 + (Font->Width % 8 ? 1 : 0));
+
     uint32_t Char_Offset = (Acsii_Char - ' ') * Font->Height * (Font->Width / 8 + (Font->Width % 8 ? 1 : 0));
-    const unsigned char *ptr = &Font->table[Char_Offset];
+    const unsigned char* ptr = &Font->table[Char_Offset];
 
-    for (Page = 0; Page < Font->Height; Page ++ ) {
-        for (Column = 0; Column < Font->Width; Column ++ ) {
+    DUMP(Font->Height);
+    DUMP(Font->Width);
+    DUMP(Char_Offset);
+    
+    //--- zugriff auf PROGMEM-Array
+    //--- https://arduino-esp8266.readthedocs.io/en/latest/PROGMEM.html
 
-            //To determine whether the font background color and screen background color is consistent
-            if (FONT_BACKGROUND == Color_Background) { //this process is to speed up the scan
+    for (Page = 0; Page < Font->Height; Page ++ ) 
+    {
+        Debug ("Paint_DrawChar.in.page\r\n"); 
+        DUMP(Page); 
+
+        for (Column = 0; Column < Font->Width; Column ++ ) 
+        {
+            Debug ("Paint_DrawChar.in.column\r\n"); 
+            DUMP(Column);     
+            
+            //--- to determine whether the font background color and screen background color is consistent
+            //--- is it white?
+            if (FONT_BACKGROUND == Color_Background) 
+            { 
+                Debug ("Paint_DrawChar.FONT_BACKGROUND == Color_Background\r\n"); 
+                //---- this process is to speed up the scan
                 if (*ptr & (0x80 >> (Column % 8)))
                     Paint_SetPixel(Xpoint + Column, Ypoint + Page, Color_Foreground);
                     // Paint_DrawPoint(Xpoint + Column, Ypoint + Page, Color_Foreground, DOT_PIXEL_DFT, DOT_STYLE_DFT);
-            } else {
-                if (*ptr & (0x80 >> (Column % 8))) {
+            } 
+            else 
+            {
+                Debug ("Paint_DrawChar.FONT_BACKGROUND != Color_Background\r\n"); 
+                DUMP(Column); 
+                //DUMP(*ptr); 
+
+                if (*ptr & (0x80 >> (Column % 8))) 
+                {
+                    Debug ("Paint_DrawChar.*ptr & (0x80 >> (Column % 8)==true\r\n"); 
                     Paint_SetPixel(Xpoint + Column, Ypoint + Page, Color_Foreground);
                     // Paint_DrawPoint(Xpoint + Column, Ypoint + Page, Color_Foreground, DOT_PIXEL_DFT, DOT_STYLE_DFT);
-                } else {
+                } 
+                else 
+                {
+                    Debug ("Paint_DrawChar.*ptr & (0x80 >> (Column % 8)!=true\r\n"); 
                     Paint_SetPixel(Xpoint + Column, Ypoint + Page, Color_Background);
                     // Paint_DrawPoint(Xpoint + Column, Ypoint + Page, Color_Background, DOT_PIXEL_DFT, DOT_STYLE_DFT);
                 }
             }
+
             //One pixel is 8 bits
             if (Column % 8 == 7)
                 ptr++;
-        }// Write a line
+        } //--- Write a line
+        
+        DUMP(Font->Width % 8);
+        
         if (Font->Width % 8 != 0)
             ptr++;
     }// Write all
@@ -613,31 +800,93 @@ parameter:
     Font             ：A structure pointer that displays a character size
     Color_Foreground : Select the foreground color
     Color_Background : Select the background color
+    
+    ex Paint_DrawString_EN
 ******************************************************************************/
-void Paint_DrawString_EN(UWORD Xstart, UWORD Ystart, const char * pString,
+void Paint_DrawText(UWORD Xstart, UWORD Ystart, const char * pString,
                          sFONT* Font, UWORD Color_Foreground, UWORD Color_Background)
 {
     UWORD Xpoint = Xstart;
     UWORD Ypoint = Ystart;
+
+    Debug("Paint_DrawString_EN.IN\r\n"); 
 
     if (Xstart > Paint.Width || Ystart > Paint.Height) {
         Debug("Paint_DrawString_EN Input exceeds the normal display range\r\n");
         return;
     }
 
-    while (* pString != '\0') {
-        //if X direction filled , reposition to(Xstart,Ypoint),Ypoint is Y direction plus the Height of the character
-        if ((Xpoint + Font->Width ) > Paint.Width ) {
-            Xpoint = Xstart;
-            Ypoint += Font->Height;
+/* 
+    DUMP(Font->Width);
+    DUMP(Paint.Width);
+    DUMP(Paint.Height);
+    DUMP(Xstart);
+    DUMP(Ystart);
+ */
+
+    //TODO: check clipping limits if rotate and mirror are active! 
+    //TODO: depending of x and y meanig and orientation
+   
+
+    while (* pString != '\0') 
+    {
+        //DUMP(Paint.Width);
+        //DUMP(Paint.Height);
+
+        if (Paint.Rotate ==  ROTATE_180 ||Paint.Rotate ==  ROTATE_0)    
+        {
+            //TODO
+        }
+        else if(Paint.Rotate ==  ROTATE_90 || Paint.Rotate ==  ROTATE_270)
+        {
+            //--- This is experimental, consider rotation for clipping
+            //--- Clipping: if X direction filled , reposition to(Xstart,Ypoint),Ypoint is Y direction plus the Height of the character
+            if ((Xpoint + Font->Width ) > Paint.Height ) 
+            {
+                Xpoint = Xstart;
+                Ypoint += Font->Height;
+            }
+
+            //--- Clipping: If the Y direction is full, reposition to(Xstart, Ystart)
+            if ((Ypoint  + Font->Height ) > Paint.Width ) 
+            {
+                Xpoint = Xstart;
+                Ypoint = Ystart;
+            }
+
+        }
+        else
+        {
+            //--- Clipping: if X direction filled , reposition to(Xstart,Ypoint),Ypoint is Y direction plus the Height of the character
+            if ((Xpoint + Font->Width ) > Paint.Width ) 
+            {
+                Xpoint = Xstart;
+                Ypoint += Font->Height;
+            }
+
+            //--- Clipping: If the Y direction is full, reposition to(Xstart, Ystart)
+            if ((Ypoint  + Font->Height ) > Paint.Height ) 
+            {
+                Xpoint = Xstart;
+                Ypoint = Ystart;
+            }
+
         }
 
-        // If the Y direction is full, reposition to(Xstart, Ystart)
-        if ((Ypoint  + Font->Height ) > Paint.Height ) {
-            Xpoint = Xstart;
-            Ypoint = Ystart;
-        }
-        Paint_DrawChar(Xpoint, Ypoint, * pString, Font, Color_Background, Color_Foreground);
+   /*   
+        DUMP(Xpoint);
+        DUMP(Ypoint); 
+    */
+       
+        //Debug ("call Paint_DrawChar"); 
+        //NOK, da Pointer-Error?
+        //  Paint_DrawChar(Xpoint, Ypoint, * pString, Font, Color_Background, Color_Foreground);
+
+        //+++++ Workaround ++++++   
+        //Ok, diese Variante funktioniert, ist aber 180 Grad gedreht und Spiegel-verkehrt!!!
+        //--- see Paint_NewImage initializers! 
+        Paint_DrawCharAt(Xpoint, Ypoint, * pString, Font, Color_Background);
+        //+++++ Workaround ++++++
 
         //The next character of the address
         pString ++;
@@ -785,7 +1034,7 @@ void Paint_DrawNum(UWORD Xpoint, UWORD Ypoint, int32_t Nummber,
     }
 
     //show
-    Paint_DrawString_EN(Xpoint, Ypoint, (const char*)pStr, Font, Color_Background, Color_Foreground);
+    Paint_DrawText(Xpoint, Ypoint, (const char*)pStr, Font, Color_Background, Color_Foreground);
 }
 
 /******************************************************************************

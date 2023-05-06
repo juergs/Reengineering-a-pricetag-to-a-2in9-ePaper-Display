@@ -22,10 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+#include<stdint.h>
 
+//extern const uint8_t IMAGE_BLACK[];
 extern const unsigned char IMAGE_BLACK[];
+//extern const uint8_t IMAGE_RED[];
 extern const unsigned char IMAGE_RED[];
-
 /* FILE END */
 
 

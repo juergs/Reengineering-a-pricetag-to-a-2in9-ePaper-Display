@@ -90,11 +90,13 @@ int Epd::Init(void)
     SendCommand(0x11); 
     SendData(0x01);
 
+    //TODO: get influence on orientation with  rotate + mirror. Default? 
     //--- set Ram-X address start/end position
     SendCommand(0x44); 
     SendData(0x00);
     SendData(0x0F);     //--- 0x0F-->(15+1)*8=128
 
+    //TODO: get influence on orientation with  rotate + mirror. Default?
     //--- Set ram Y start/end postion
     SendCommand(0x45); 
     SendData(0x27);
@@ -179,46 +181,62 @@ void Epd::ResetDisplay(void) {
  * ----------------------------------------------------  */
 void Epd::SetPartialWindow(const unsigned char* buffer_black, const unsigned char* buffer_red, int x, int y, int w, int l) 
 {
-    #warning not established yet
-    /* SendCommand(PARTIAL_IN);
-    SendCommand(PARTIAL_WINDOW);
-    SendData(x & 0xf8);     // x should be the multiple of 8, the last 3 bit will always be ignored
-    SendData(((x & 0xf8) + w  - 1) | 0x07);
-    SendData(y >> 8);        
-    SendData(y & 0xff);
-    SendData((y + l - 1) >> 8);        
-    SendData((y + l - 1) & 0xff);
-    SendData(0x01);         // Gates scan both inside and outside of the partial window. (default) 
-    DelayMs(2);
-    SendCommand(DATA_START_TRANSMISSION_1);
-    if (buffer_black != NULL) {
-        for(int i = 0; i < w  / 8 * l; i++) {
-            SendData(buffer_black[i]);  
-        }  
-    } else {
-        for(int i = 0; i < w  / 8 * l; i++) {
-            SendData(0x00);  
-        }  
-    }
-    DelayMs(2);
-    SendCommand(DATA_START_TRANSMISSION_2);
-    if (buffer_red != NULL) {
-        for(int i = 0; i < w  / 8 * l; i++) {
-            SendData(buffer_red[i]);  
-        }  
-    } else {
-        for(int i = 0; i < w  / 8 * l; i++) {
-            SendData(0x00);  
-        }  
-    }
-    DelayMs(2);
-    SendCommand(PARTIAL_OUT);   */
+    #define PARTIAL_IN                  0x91
+    #define PARTIAL_WINDOW              0x10
+    #define DATA_START_TRANSMISSION_1   0x13
+    #define DATA_START_TRANSMISSION_2   
+    #define PARTIAL_OUT                 0x92
+
+    #warning in dev_progress or not established yet
+    // SendCommand(PARTIAL_IN);    
+    
+    // SendCommand(PARTIAL_WINDOW);
+    // SendData(x & 0xf8);             //--- x should be the multiple of 8, the last 3 bit will always be ignored
+    // SendData(((x & 0xf8) + w  - 1) | 0x07);
+    // SendData(y >> 8);        
+    // SendData(y & 0xff);
+    // SendData((y + l - 1) >> 8);        
+    // SendData((y + l - 1) & 0xff);
+    // SendData(0x01);                 //--- Gates scan both inside and outside of the partial window. (default) 
+    // DelayMs(2);
+    
+    // SendCommand(DATA_START_TRANSMISSION_1);
+    // if (buffer_black != NULL) {
+    //     for(int i = 0; i < w  / 8 * l; i++) 
+    //     {
+    //         SendData(buffer_black[i]);  
+    //     }  
+    // } else {
+    //     for(int i = 0; i < w  / 8 * l; i++) 
+    //     {
+    //         SendData(0x00);  
+    //     }  
+    // }
+    // DelayMs(2);
+    
+    // SendCommand(DATA_START_TRANSMISSION_2);
+    // if (buffer_red != NULL) 
+    // {
+    //     for(int i = 0; i < w  / 8 * l; i++) 
+    //     {
+    //         SendData(buffer_red[i]);  
+    //     }  
+    // } else 
+    // {
+    //     for(int i = 0; i < w  / 8 * l; i++) 
+    //     {
+    //         SendData(0x00);  
+    //     }  
+    // }
+    // DelayMs(2);
+    // SendCommand(PARTIAL_OUT);  
 }
 
 /** ----------------------------------------------------
  *  @brief: transmit partial data to the black part of SRAM
  * ----------------------------------------------------  */
-void Epd::SetPartialWindowBlack(const unsigned char* buffer_black, int x, int y, int w, int l) {
+void Epd::SetPartialWindowBlack(const unsigned char* buffer_black, int x, int y, int w, int l) 
+{
     #warning not established yet
     /* SendCommand(PARTIAL_IN);
     SendCommand(PARTIAL_WINDOW);
@@ -247,7 +265,8 @@ void Epd::SetPartialWindowBlack(const unsigned char* buffer_black, int x, int y,
 /** ----------------------------------------------------
  *  @brief: transmit partial data to the red part of SRAM
  * ----------------------------------------------------  */
-void Epd::SetPartialWindowRed(const unsigned char* buffer_red, int x, int y, int w, int l) {
+void Epd::SetPartialWindowRed(const unsigned char* buffer_red, int x, int y, int w, int l) 
+{
     #warning not established yet
    /*  SendCommand(PARTIAL_IN);
     SendCommand(PARTIAL_WINDOW);
@@ -272,6 +291,63 @@ void Epd::SetPartialWindowRed(const unsigned char* buffer_red, int x, int y, int
     DelayMs(2);
     SendCommand(PARTIAL_OUT);   */
 }
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//--- 08.0423 juergs Test Partial
+void Epd::Display_Partial(unsigned char *Image)
+{
+	unsigned int i;
+//Reset
+    ResetDisplay();
+	//--- read lookuptable partial driving
+    Transfer_LUT(PARTIAL_LUT);  //_WF_PARTIAL_2IN9	
+    SendCommand(0x37);  //--- write register for display option 
+	SendData(0x00);  
+	SendData(0x00);  
+	SendData(0x00);  
+	SendData(0x00); 
+	SendData(0x00);  	
+	SendData(0x40);  
+	SendData(0x00);  
+	SendData(0x00);   
+	SendData(0x00);  
+	SendData(0x00);
+
+	SendCommand(0x3C);  	//---   BorderWavefrom
+	SendData(0x80);	
+
+	SendCommand(0x22); 
+	SendData(0xC0);   
+	SendCommand(0x20); 
+	
+    WaitUntilIdle();
+	
+	SetWindows(0, 0, EPD_WIDTH-1, EPD_HEIGHT-1);
+	SetCursor(0, 0);
+
+	SendCommand(0x24);   //--- Write back full Black and White image to RAM
+	for(i=0;i<4736;i++)
+	{
+		SendData(Image[i]);
+	} 
+	TurnOnDisplay_Partial();
+}
+
+/** ----------------------------------------------------
+ * @brief: sends LUT to EPD-registers
+ * ----------------------------------------------------  */
+void Epd::Transfer_LUT(unsigned char *lut)
+{       
+	unsigned char count;
+	SendCommand(0x32);
+	
+    for(count=0; count<153; count++) 
+		SendData(lut[count]); 
+
+	WaitUntilIdle();
+}
+
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 /** ----------------------------------------------------
  * @brief: refresh and displays the frame
@@ -303,7 +379,6 @@ void Epd::DisplayFrame(const unsigned char* frame_buffer_black, const unsigned c
     SendData(0xF7);
     SendCommand(0x20);  //--- activate Display Update Sequence
     
-
     WaitUntilIdle();
 }
 
@@ -313,14 +388,15 @@ void Epd::DisplayFrame(const unsigned char* frame_buffer_black, const unsigned c
 void Epd::ClearFrame(void) 
 {    
     /* TRACE(); */
+/* 
+    DUMP(width);
+    DUMP(height);
+    DUMP(width * height / 8);
+ */  
     //--- write RAM for black(0)/white (1)      
     SendCommand(0x24);
     DelayMs(2);
     
-    /* DUMP(width);
-    DUMP(height);
-    DUMP(width * height / 8);
- */
     for(unsigned int i = 0; i < width * height / 8; i++) 
     {
         SendData(0xFF);  
@@ -488,44 +564,44 @@ void Epd::LoadLookUpTable(void)
 function :	Display_Partial 
 parameter:
 ******************************************************************************/
-void Epd::Display_Partial(uint8_t *Image)
-{
-	uint16_t i;
+// void Epd::Display_Partial(uint8_t *Image)
+// {
+// 	uint16_t i;
 
-//Reset
-    ResetDisplay(); 		
-	LoadLookUpTable();
+// //Reset
+//     ResetDisplay(); 		
+// 	LoadLookUpTable();
 
-	SendCommand(0x37); 
-	SendData(0x00);  
-	SendData(0x00);  
-	SendData(0x00);  
-	SendData(0x00); 
-	SendData(0x00);  
-	SendData(0x40);  
-	SendData(0x00);  
-	SendData(0x00);   
-	SendData(0x00);  
-	SendData(0x00);
+// 	SendCommand(0x37); 
+// 	SendData(0x00);  
+// 	SendData(0x00);  
+// 	SendData(0x00);  
+// 	SendData(0x00); 
+// 	SendData(0x00);  
+// 	SendData(0x40);  
+// 	SendData(0x00);  
+// 	SendData(0x00);   
+// 	SendData(0x00);  
+// 	SendData(0x00);
 
-	SendCommand(0x3C); //BorderWavefrom
-	SendData(0x80);	
+// 	SendCommand(0x3C); //BorderWavefrom
+// 	SendData(0x80);	
 
-	SendCommand(0x22); 
-	SendData(0xC0);   
-	SendCommand(0x20); 
-	WaitUntilIdle(); 
+// 	SendCommand(0x22); 
+// 	SendData(0xC0);   
+// 	SendCommand(0x20); 
+// 	WaitUntilIdle(); 
 	
-	SetWindows(0, 0, EPD_WIDTH-1, EPD_HEIGHT-1);
-	SetCursor(0, 0);
+// 	SetWindows(0, 0, EPD_WIDTH-1, EPD_HEIGHT-1);
+// 	SetCursor(0, 0);
 
-	SendCommand(0x24);   //Write Black and White image-buffer to Display-RAM
-	for(i=0;i<4736;i++)
-	{
-		SendData(Image[i]);
-	} 
-	TurnOnDisplay_Partial();
-}
+// 	SendCommand(0x24);   //Write Black and White image-buffer to Display-RAM
+// 	for(i=0;i<4736;i++)
+// 	{
+// 		SendData(Image[i]);
+// 	} 
+// 	TurnOnDisplay_Partial();
+// }
 
 /******************************************************************************
 function :	Setting the display window

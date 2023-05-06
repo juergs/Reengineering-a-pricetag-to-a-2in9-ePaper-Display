@@ -109,6 +109,9 @@ extern PAINT Paint;
 #define ROTATE_180          180
 #define ROTATE_270          270
 
+// Color inverse. 1 or 0 = set or reset a bit if set a colored pixel
+#define IF_INVERT_COLOR     1
+
 /**
  * Display Flip
 **/
@@ -208,7 +211,14 @@ void Paint_DrawCircle(UWORD X_Center, UWORD Y_Center, UWORD Radius, UWORD Color,
 
 //Display string
 void Paint_DrawChar(UWORD Xstart, UWORD Ystart, const char Acsii_Char, sFONT* Font, UWORD Color_Foreground, UWORD Color_Background);
-void Paint_DrawString_EN(UWORD Xstart, UWORD Ystart, const char * pString, sFONT* Font, UWORD Color_Foreground, UWORD Color_Background);
+void Paint_DrawText(UWORD Xstart, UWORD Ystart, const char * pString, sFONT* Font, UWORD Color_Foreground, UWORD Color_Background); // ex Paint_DrawString_EN
+
+//Test, der funktioniert
+void Paint_DrawCharAt(int x, int y, char ascii_char, sFONT* font, int colored) ;
+void Paint_DrawStringAt(int x, int y, const char* text, sFONT* font, int colored) ; 
+void Paint_DrawPixel(int x, int y, int colored);
+void Paint_DrawAbsolutePixel(int x, int y, int colored);
+
 //--- chinese not needed
 //void Paint_DrawString_CN(UWORD Xstart, UWORD Ystart, const char * pString, cFONT* font, UWORD Color_Foreground, UWORD Color_Background);
 void Paint_DrawNum(UWORD Xpoint, UWORD Ypoint, int32_t Nummber, sFONT* Font, UWORD Color_Foreground, UWORD Color_Background);
